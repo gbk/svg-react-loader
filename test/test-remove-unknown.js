@@ -1,9 +1,33 @@
 /*globals describe, it*/
 var react  = require('react');
+var loader = require('../');
 var babel  = require('babel-core');
 var fs     = require('fs');
 var path   = require('path');
-var loader = require('./mock-loader');
+var _      = require('lodash');
+var assign = _.assign;
+
+var defaultMock = {
+    callback:       function (error, result) {
+        if (error) {
+            throw error;
+        }
+        console.log(result);
+    },
+    cacheable:      function () {},
+    addDependency:  function () {},
+    query:          '?reactDOM=react',
+    resourcePath:   'foo.svg'
+    // resourceQuery:  '?tag=symbol&name=AdvantageIcon&attrs={foo:\'bar\'}'
+};
+
+require('should');
+
+function invoke (xml, mock) {
+    var context = assign({}, defaultMock, mock || {});
+    context.async = function () { return this.callback; }.bind(context);
+    loader.call(context, xml);
+}
 
 function read (filepath) {
     return fs.readFileSync(path.join(__dirname, filepath), 'utf8');
@@ -17,7 +41,7 @@ describe('something', function () {
     it('should do something', function (done) {
         // var filename = 'ffg-sw-advantage.svg';
         var filename = './svg/mashup.svg';
-        loader(read(filename), {
+        invoke(read(filename), {
             callback: function (error, result) {
                 if (error) {
                     throw error;
@@ -37,7 +61,7 @@ describe('something', function () {
     it('should handle styles', function (done) {
         var filename = './svg/styles.svg';
 
-        loader(read(filename), {
+        invoke(read(filename), {
             callback: function (error, result) {
                 if (error) {
                     throw error;
@@ -65,7 +89,7 @@ describe('something', function () {
     it.only('should handle text elements', function (done) {
         var filename = './svg/text.svg';
 
-        loader(read(filename), {
+        invoke(read(filename), {
             callback: function (error, result) {
                 if (error) {
                     throw error;
@@ -74,7 +98,7 @@ describe('something', function () {
                 var src = babel.transform(result, {
                     presets: ['es2015', 'react']
                 }).code;
-                // console.log(src);
+                console.log(src);
                 fs.writeFileSync(__dirname + '/temp', src);
                 var el = react.createElement(require(__dirname + '/temp'));
                 var html = react.renderToStaticMarkup(el);
