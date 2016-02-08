@@ -43,11 +43,12 @@ function renderJsx (opts, callback, error, xml) {
     var xmlBuilder = new xml2js.Builder({ headless: true });
     var xmlSrc = xmlBuilder.buildObject(xml);
     var component = opts.tmpl({
-        reactDom:      opts.reactDom,
-        tagName:       opts.tagName || tagName,
-        displayName:   opts.displayName,
-        defaultProps:  props,
-        innerXml:      xmlSrc.split(/\n/).slice(1, -1).join('\n')
+        reactDom:         opts.reactDom,
+        svgLoaderHelpers: opts.svgLoaderHelpers,
+        tagName:          opts.tagName || tagName,
+        displayName:      opts.displayName,
+        defaultProps:     props,
+        innerXml:         xmlSrc.split(/\n/).slice(1, -1).join('\n')
     });
 
     callback(null, component);
@@ -72,10 +73,11 @@ module.exports = function (source) {
     // resource parameters override loader parameters
     var params = assign({}, query, rsrcQuery);
 
-    var displayName = params.name || getName(rsrcPath);
-    var tag         = params.tag || null;
-    var reactDom    = params.reactDom || 'react-dom';
-    var attrs       = {};
+    var displayName      = params.name || getName(rsrcPath);
+    var tag              = params.tag || null;
+    var reactDom         = params.reactDom || 'react-dom';
+    var svgLoaderHelpers = params.svgLoaderHelpers || 'svg-react-loader/helpers';
+    var attrs            = {};
 
     if (params.attrs) {
         // easier than having to write json in the query
@@ -85,10 +87,11 @@ module.exports = function (source) {
     }
 
     var opts = {
-        reactDom: reactDom,
-        tagName: tag,
-        attrs: attrs,
-        displayName: displayName
+        reactDom:         reactDom,
+        svgLoaderHelpers: svgLoaderHelpers,
+        tagName:          tag,
+        attrs:            attrs,
+        displayName:      displayName
     };
 
     var render = partial(renderJsx, opts, callback);
