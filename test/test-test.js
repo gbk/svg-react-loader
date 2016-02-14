@@ -87,7 +87,7 @@ describe('something', function () {
     });
 
     it.only('should handle text elements', function (done) {
-        var filename = './svg/text.svg';
+        var filename = './svg/link-icon.svg';
 
         invoke(read(filename), {
             callback: function (error, result) {
